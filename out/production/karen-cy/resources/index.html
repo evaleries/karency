@@ -1,0 +1,132 @@
+<html>
+
+<head>
+    <title>Simple Currency Converter - Pemjar A</title>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <style>
+        body{
+            background: -webkit-linear-gradient(left, #0072ff, #00c6ff);
+        }
+        .currency-form {
+            background: #fff;
+            margin-top: 10%;
+            margin-bottom: 5%;
+            width: 70%;
+            border-radius: 0.6em;
+        }
+        .currency-form .form-control {
+            border-radius:1rem;
+        }
+        .currency-image {
+            text-align: center;
+        }
+        .currency-image img {
+            border-radius: 6rem;
+            width: 11%;
+            margin-top: -3%;
+            transform: rotate(29deg);
+        }
+        .currency-form form {
+            padding: 14%;
+        }
+        .currency-form form .row {
+            margin-bottom: -7%;
+        }
+        .currency-form h3 {
+            margin-bottom: 8%;
+            margin-top: -10%;
+            text-align: center;
+            color: #0062cc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container currency-form">
+        <div class="currency-image">
+            <img src="https://image.ibb.co/kUagtU/rocket_contact.png" alt="rocket_contact"/>
+        </div>
+        <form action="#" method="POST" id="#form">
+            <h3>Karency - Konversi Mata Uang</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <input type="number" name="amount" id="amount" class="form-control" placeholder="Jumlah" />
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="base" id="base" class="form-control" placeholder="Basis Mata Uang (IDR, USD)" />
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="target" id="target" class="form-control" placeholder="Mata Uang Tujuan (USD, IDR)" />
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" name="btnSubmit" class="btn btn-primary" value="Konversi" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <textarea name="quote" id="quote" class="form-control" placeholder="Loading..." readonly="true" style="width: 120%; height: 150px;"></textarea>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="//code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let datasets;
+            $("input[type=submit]").hide();
+            $.ajaxSetup({ cache: false });
+
+            $.ajax({
+                url: "rates",
+                cache: false
+            }).then(function(json) {
+                datasets = json;
+                console.log(json);
+                $('#quote').val("Aplikasi siap digunakan");
+                $("input[type=submit]").show();
+            }).fail(function (e) {
+                console.log(e);
+            });
+
+            $("#base").focus(function() {
+                if (typeof datasets.rates === 'undefined') {
+                    $("#quote").val("Silahkan tunggu data sedang di proses!");
+                    return;
+                }
+
+                $('#quote').val("Silahkan pilih basis mata uang: \r\n" + Object.keys(datasets.rates).join("\r\n"));
+            });
+
+            $("form").submit(function (e) {
+                if (typeof datasets === 'undefined') return;
+                e.preventDefault();
+                base = $('#base').val().toUpperCase();
+                target = $('#target').val().toUpperCase();
+                amount = parseInt($('#amount').val());
+
+                if (typeof datasets.rates[base] === 'undefined') {
+                    $('#quote').val("Basis Mata uang tidak disupport");
+                    return;
+                }
+                if (typeof datasets.rates[target] === 'undefined') {
+                    $('#quote').val("Tujuan Mata uang tidak disupport");
+                    return;
+                }
+
+                if (base !== '' && target !== '') {
+                    baseRate = datasets.rates[base];
+                    targetRate = datasets.rates[target]
+                    let usd = amount / baseRate;
+                    let result = usd * targetRate;
+                    $("#quote").val(`${amount} ${base} = ${result.toFixed(2)} ${target}`)
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>
