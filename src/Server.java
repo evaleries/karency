@@ -67,7 +67,7 @@ class Server implements Runnable {
                 headers.put("Content-Length", String.valueOf(responseAPI.length()));
                 headers.put("Connection", "close");
                 headers.put("Cache-Control", "no-cache, no-store, must-revalidate");
-                headers.put("Pragma", "no- cache");
+                headers.put("Pragma", "no-cache");
                 sendHeaders("200 OK", headers);
 
                 bufOut.write(responseAPI.getBytes(), 0, responseAPI.length());
@@ -78,7 +78,6 @@ class Server implements Runnable {
             }
 
         } catch (FileNotFoundException e) {
-            httpError("404 Not Found");
             System.out.println("File tidak ditemukan: " + requestFile + " -> " + new File(DIR, requestFile).getAbsolutePath());
         } catch (Exception e) {
             e.printStackTrace();
@@ -122,12 +121,6 @@ class Server implements Runnable {
         }
 
         return content;
-    }
-
-    private void httpError(String status) {
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put("Date", new Date().toString());
-        sendHeaders(status, headers);
     }
 
     private void sendHeaders(String httpStatus, HashMap<String, String> headers) {

@@ -77,7 +77,6 @@
         $(document).ready(function() {
             let datasets;
             $("input[type=submit]").hide();
-            $.ajaxSetup({ cache: false });
 
             $.ajax({
                 url: "rates",
@@ -121,10 +120,9 @@
                 if (base !== '' && target !== '') {
                     baseRate = datasets.rates[base];
                     targetRate = datasets.rates[target]
-                    let usd = amount / baseRate;
-                    let result = usd * targetRate;
+                    let result = (amount / baseRate) * targetRate;
                     $("#quote").val(`${amount} ${base} = ${result.toFixed(2)} ${target}`)
-                }
+            }
             });
         });
     </script>
