@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.StringTokenizer;
 
 class Server implements Runnable {
-
-    private final String API = "https://api.ratesapi.io/api";
-
+    
     private static final File DIR = new File("src", "resources");
     private final String httpVersion = "1.1";
     private Socket clientSocket;
