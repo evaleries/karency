@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.StringTokenizer;
 
 class Server implements Runnable {
-    
+
     private static final File DIR = new File("src", "resources");
     private final String httpVersion = "1.1";
     private Socket clientSocket;
@@ -57,7 +57,7 @@ class Server implements Runnable {
                 bufOut.flush();
             } else if (requestMethod.equals("GET") && requestFile.startsWith("/rates")) {
                 System.out.println("----------------------------> Request ke Rate");
-                String responseAPI = getRate("USD");
+                String responseAPI = getRate();
                 headers.put("Content-Type", "application/json");
                 headers.put("Content-Length", String.valueOf(responseAPI.length()));
                 headers.put("Connection", "close");
@@ -79,7 +79,7 @@ class Server implements Runnable {
         }
     }
 
-    private String getRate(String base) throws IOException {
+    private String getRate() {
 
         if (Main.cachedResponse != null) {
             System.out.println("Getting response from cache");
@@ -106,9 +106,10 @@ class Server implements Runnable {
             while ((headerRes = inStream.readLine()) != null) {
                 if (headerRes.startsWith("{") && headerRes.endsWith("}")) {
                     result = headerRes;
-                    System.out.println("Response dari Server: ");
+                    System.out.println("Response dari Server: " + result);
+                } else {
+                    System.out.println(headerRes);
                 }
-                System.out.println(headerRes);
             }
 
             Main.cachedResponse = result;
