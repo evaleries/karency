@@ -1,10 +1,4 @@
-import okhttp3.Headers;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-
 import java.io.*;
-import java.lang.Thread;
 import java.net.Socket;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,7 +12,6 @@ class Server implements Runnable {
     private final String httpVersion = "1.1";
     private Socket clientSocket;
 
-    private static final OkHttpClient httpClient = new OkHttpClient();
     private BufferedOutputStream bufOut;
     private BufferedReader in;
     private PrintWriter out;
@@ -39,8 +32,12 @@ class Server implements Runnable {
             out = new PrintWriter(clientSocket.getOutputStream());
             bufOut = new BufferedOutputStream(clientSocket.getOutputStream());
 
-            String input = in.readLine();
-            StringTokenizer parse = new StringTokenizer(input);
+            String input = in.readLine(); // GET / HTTP/1.1
+            if (input == null) {
+                throw new Exception("Error input, null");
+            }
+
+            StringTokenizer parse = new StringTokenizer(input); // ["GET", "/", "HTTP/1.1"]
 
             System.out.println(input);
 
@@ -87,22 +84,39 @@ class Server implements Runnable {
     private String getRate(String base) throws IOException {
 
         if (Main.cachedResponse != null) {
-            System.out.println("Calling from cache");
+            System.out.println("Getting response from cache");
+            System.out.println(Main.cachedResponse);
             return Main.cachedResponse;
         }
 
-        String baseCurrency = (base == null) ? "USD" : base;
-        String url = String.format("%s/latest?base=%s", API, baseCurrency);
+        String host = "100.25.153.103";
 
-        Request request = new Request.Builder().url(url).build();
         String result = "{}";
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (! response.isSuccessful()) throw new Exception("Unexpected Code: " + response);
+        try {
+            Socket socket = new Socket(host, 80);
 
-            result = response.body().string();
+            BufferedReader inStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter outStream = new PrintWriter(socket.getOutputStream(), true);
+
+            outStream.println("GET /api.php HTTP/1.1");
+            outStream.println("Host: " + host);
+            outStream.println("User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0");
+            outStream.println("Connection: close");
+            outStream.println();
+
+            String headerRes = "";
+            while ((headerRes = inStream.readLine()) != null) {
+                if (headerRes.startsWith("{") && headerRes.endsWith("}")) {
+                    result = headerRes;
+                    System.out.println("Response dari Server: ");
+                }
+                System.out.println(headerRes);
+            }
+
             Main.cachedResponse = result;
         } catch (Exception e) {
-            System.out.println("Error getRate: " + e.getMessage());
+            System.out.println("Error saat memanggil API: ");
+            e.printStackTrace();
         }
 
         return result;
